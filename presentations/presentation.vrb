@@ -1,0 +1,14 @@
+\frametitle{Generierung des Huffman-Baums - \newline Speicherung - Programmcode}
+\begin{lstlisting}[style=numbers]
+BitWriter<> writer(output);
+writer.add(leaveCount);
+
+for (const _Leave<T>* ptr = this->m_FirstLeave; ptr; ptr = ptr->nextLeave){
+writer.addByte(8 * (1 + (char)sizeof(T)) + (char)ptr->m_Coding.size());
+const char* tmpPtr = reinterpret_cast<const char*>(&ptr->data.first);
+for (int i = 0; i < sizeof(T); ++i)
+writer.addByte(tmpPtr[i]);
+writer.addBits(ptr->m_Coding);
+}
+writer.flush();
+    \end{lstlisting}

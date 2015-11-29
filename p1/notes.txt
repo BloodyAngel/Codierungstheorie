@@ -1,0 +1,63 @@
+Highlevel overview:
+Codierung:
+- BinaryHuffmanTree wird aus übergebenen String erstellt
+- Codierung der einzelnen Zeichen wird ausgegeben
+- Berechnung/Ausgabe der Entropie
+- Codierungen werden in Binär in "header.txt"-Datei gespeichert
+- Übergebener String wird mit Codierung verarbeitet & in Binärdatei: "coding.txt" geschrieben
+Decodierung:
+- Wiederherstellen des BinaryHuffmanTree's von "header.txt"-Datei
+- Mit diesem Baum die Datei "coding.txt" entschlüsseln und durchscnittliche Zeichenlänge ausgeben (Entropie)
+
+
+Klassenübersicht:
+BitReader	  - Liest    eine Binärdatei
+BitWriter	  - Schreibt eine Binärdatei
+BinaryHuffmanTree - Verarbeitet den eingegebenen String
+
+
+Detailiert
+Generierung des Huffman-Baums:
+1. Wahrscheinlichkeit jedes einzelnen Zeichens errechnen
+2. Zeichen anhand ihrer Wahrscheinlichkeit sortieren (aufsteigend)
+3. Sortierte Zeichen als einfach verkettete Liste (zur Suche) verbinden
+4. Die am geringsten verwendeten zeichen vereinen
+5. Vereintes Zeichen in bereits sortiertes Array einfügen "wie insertion sort"
+6. schritte 4 & 5 wiederholen bis nur noch ein Root-Element existiert
+
+Schreiben der Header Datei:
+- 32-Bit: Anzahl der Symbole
+-  8-Bit: Byte-Größe einen Zeichens // char => 1
+- Je Symbol
+	- Anzahl der Bits für Zeichen im Header
+	- Das decodierte Symbol
+	- Codierung des Symbols
+
+Ausgabe der Entropie:
+- Für jedes Symbol "Wahrscheinlichkeit * Codierungslänge" aufsummieren
+
+Schreiben der coding Datei:
+- Generierung einer Coding Tabelle (nur für char-type)
+	* Laufzeit der Generierung: O(N) // N = Anzahl Symbole
+	* Laufzeit für Look-Up	  : O(1)
+- Einzelnen Symbole des Strings durch gehen
+	* Codierung des Symbols holen
+	* Codierung in BitWriter ("Buffer") schreiben
+
+Lesen der Header Datei
+- siehe Folie "Schreiben der Header Datei"
+
+Decodierung des Textes
+- von Header generierten Baum "durch gehen", 
+	wird eine 1 gelesen gehe linken Node
+			         rechts sonst
+- Abbruch bei einem Blatt (linker/rechter Node = nullptr)
+- Ausgabe der Zeichenlänge pro Bit
+	Pro gelesenem Bit (nicht byte)  wird ein counter hoch gezählt
+	Am Ende der Datei wird durch Anzahl der erhaltenen Symbole dividiert
+
+
+
+
+
+

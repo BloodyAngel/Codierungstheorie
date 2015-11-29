@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../p2/include/Polynom.hpp
+ostream
+-
+array
+-
+
+/home/bloodyangel/Desktop/Codierungtheorie/p2/main.cpp
+Polynom.hpp
+/home/bloodyangel/Desktop/Codierungtheorie/p2/Polynom.hpp
+iostream
+-
+

@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.36pt}
+\select@language {ngerman}
+\beamer@sectionintoc {1}{Generierung des Huffman-Baums}{3}{0}{1}
+\beamer@sectionintoc {2}{Zeichencodierung}{8}{0}{2}
+\beamer@sectionintoc {3}{Rekunstruktion des Huffman-Baums}{10}{0}{3}
+\beamer@sectionintoc {4}{Lesen des codierten Strings}{12}{0}{4}
