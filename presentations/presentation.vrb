@@ -1,14 +1,29 @@
-\frametitle{Generierung des Huffman-Baums - \newline Speicherung - Programmcode}
-\begin{lstlisting}[style=numbers]
-BitWriter<> writer(output);
-writer.add(leaveCount);
+\frametitle{Lesen des codierten Strings - \newline Programmcode}
+\label{EntropieLesen}
+  ^^I\begin{lstlisting}[style=numbers]
+std::fstream input(filename, std::fstream::in);
+if (!input)
+    throw "Error, file can't be opened for reading";
 
-for (const _Leave<T>* ptr = this->m_FirstLeave; ptr; ptr = ptr->nextLeave){
-writer.addByte(8 * (1 + (char)sizeof(T)) + (char)ptr->m_Coding.size());
-const char* tmpPtr = reinterpret_cast<const char*>(&ptr->data.first);
-for (int i = 0; i < sizeof(T); ++i)
-writer.addByte(tmpPtr[i]);
-writer.addBits(ptr->m_Coding);
+float bitCount = 0.f;
+float characterCount = 0.f;
+
+BitReader<> reader(input);
+while(reader.good()){
+    std::unique_ptr<_Node<T>>* iter = &this->m_Root;
+
+    // find symbol
+    while((*iter)->leftNode || (*iter)->rightNode){
+        bool left = reader.readBit();
+        ++bitCount;
+
+        if (left)
+            iter = &(*iter)->leftNode;
+        else
+            iter = &(*iter)->rightNode;
+    }
+    container.push_back((*iter)->data.first);
+    ++characterCount;
 }
-writer.flush();
-    \end{lstlisting}
+std::cout << "Newly calculated entropie: " << bitCount / characterCount << std::endl;
+\end{lstlisting}

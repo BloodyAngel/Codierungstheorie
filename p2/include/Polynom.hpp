@@ -1,3 +1,5 @@
+#pragma once
+
 
 #include <ostream>
 #include <array>
@@ -88,11 +90,9 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const MY_TYPE& poly){
         for (int i = poly.m_Data.size() - 1; i >= 0; --i){
-            //os << poly.m_Data[i] << "*x^" << i << (i ? "  + " : "");
             os << poly.m_Data[i];
             if (i)
                 os << "*x^" << i << "  + ";
-
         }
 
         return os;

@@ -42,11 +42,11 @@ class BinaryHuffmanTree{
                      currentPtr != nullptr;
                      currentPtr  = currentPtr->parentNode)
                 {
-                    // 0 coding left, 1 right
+                    // 1 coding left, 0 right
                     if (currentPtr->leftNode.get() == previousePtr)
-                        coding.push_back(0);
-                    else
                         coding.push_back(1);
+                    else
+                        coding.push_back(0);
 
                     previousePtr = currentPtr;
                 }
@@ -110,6 +110,8 @@ public:
             ++numElements;
         }
         elementCounter.shrink_to_fit();
+        for (auto& e : elementCounter)
+            e->data.second /= numElements;
 
         // sort elements
         std::sort(std::begin(elementCounter), std::end(elementCounter), [](const auto& element1, const auto& element2) -> bool{
@@ -125,11 +127,6 @@ public:
             current->nextLeave = leaveRoot;
             leaveRoot = current;
         }
-
-
-
-        for (auto& e : elementCounter)
-            e->data.second /= numElements;
 
         // create huffman tree
         for (std::size_t i = 0; i < elementCounter.size() - 1; ++i){
@@ -351,7 +348,7 @@ public:
             throw "Error, file can't be opened for writing";
 
         BitWriter<> writer(output);
-        constexpr int SIZE = sizeof(T) == 1 ? 255 : 1;
+        constexpr int SIZE = sizeof(T) == 1 ? 256 : 1;
 
         if (SIZE > 1){
             // generate coding table
