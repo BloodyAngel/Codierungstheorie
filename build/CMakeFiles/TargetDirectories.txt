@@ -1,3 +1,0 @@
-/home/bloodyangel/Desktop/Codierungtheorie/build/p3/CMakeFiles/Praktika3.dir
-/home/bloodyangel/Desktop/Codierungtheorie/build/p2/CMakeFiles/Praktika2.dir
-/home/bloodyangel/Desktop/Codierungtheorie/build/p1/CMakeFiles/Praktika1.dir

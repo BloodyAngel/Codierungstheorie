@@ -28,8 +28,7 @@ public:
             this->m_Data[counter--] = e;
     }
 
-    static const MY_TYPE* DIVISION_POLYNOM;
-
+    static const MY_TYPE* DIVISION_POLYNOM; 
 
     MY_TYPE& operator+=(const MY_TYPE& poly){
         for (unsigned int i = 0; i < _MaxDegree; ++i)
@@ -47,6 +46,39 @@ public:
         return toReturn;
     }
 
+    MY_TYPE operator*(const MY_TYPE& poly){
+        if (!DIVISION_POLYNOM)
+            throw "Error: Polynomdivision not possible, DIVISION_POLYNOM not set!";
+
+        // create temporary polynom with 2*_MaxLength
+        // this is the maximum grad the *-Operation can create
+        Polynom<_MaxDegree * 2, _BaseValue> tmp;
+        Polynom<_MaxDegree * 2, _BaseValue> tmpResult;
+
+        // calculate "multiplication" into tmp poly
+        for (int i = 0, myDegree = this->degree(), polyDegree = poly.degree(); i <= myDegree; ++i){
+            for (int k = 0; k <= polyDegree; ++k)
+                tmpResult.m_Data[i + k] += poly.m_Data[k] * this->m_Data[i];
+        }
+        tmpResult._truncateToBaseValue();
+        const int divisionDegree = DIVISION_POLYNOM->degree();
+
+        for (int tmpResDegree = tmpResult.degree(); tmpResDegree >= divisionDegree; tmpResDegree = tmpResult.degree()){
+            int factor = _BaseValue - tmpResult.m_Data[tmpResDegree];
+            int shift = tmpResDegree - divisionDegree;
+
+            for (int i = 0; i <= divisionDegree; ++i)
+                tmpResult.m_Data[shift + i] += factor * DIVISION_POLYNOM->m_Data[i];
+            tmpResult._truncateToBaseValue();
+        }
+        MY_TYPE toReturn;
+        for (int i = 0; i < _MaxDegree; ++i)
+            toReturn.m_Data[i] = tmpResult.m_Data[i];
+
+        return toReturn;
+    }
+
+    /** copy
     MY_TYPE operator*(const MY_TYPE& poly){
         if (!DIVISION_POLYNOM)
             throw "Error: Polynomdivision not possible, DIVISION_POLYNOM not set!";
@@ -86,6 +118,7 @@ public:
 
         return toReturn;
     }
+    */
 
     friend std::ostream& operator<<(std::ostream& os, const MY_TYPE& poly){
         bool alreadyWrote = false;
