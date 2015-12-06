@@ -20,8 +20,11 @@ public:
         this->m_Data = std::move(rhs.m_Data);
     }
     Polynom(const std::initializer_list<int>& list) {
-        if (list.size() != _MaxDegree)
-            throw "Error: Initializer list has to many arguments (in function Polynom(std::initializer_list<int>)";
+        //if (list.size() != _MaxDegree)
+        //    throw "Error: Initializer list has to many arguments (in function Polynom(std::initializer_list<int>)";
+
+        for (auto& e : this->m_Data)
+            e = 0;
 
         int counter = list.size() - 1;
         for (auto& e : list)
@@ -37,7 +40,7 @@ public:
         this->_truncateToBaseValue();
         return *this;
     }
-    MY_TYPE operator+(const MY_TYPE& poly){
+    MY_TYPE operator+(const MY_TYPE& poly) const{
         MY_TYPE toReturn;
         for (unsigned int i = 0; i < _MaxDegree; ++i)
             toReturn.m_Data[i] = this->m_Data[i] + poly.m_Data[i];
@@ -46,7 +49,7 @@ public:
         return toReturn;
     }
 
-    MY_TYPE operator*(const MY_TYPE& poly){
+    MY_TYPE operator*(const MY_TYPE& poly) const{
         if (!DIVISION_POLYNOM)
             throw "Error: Polynomdivision not possible, DIVISION_POLYNOM not set!";
 
@@ -77,48 +80,6 @@ public:
 
         return toReturn;
     }
-
-    /** copy
-    MY_TYPE operator*(const MY_TYPE& poly){
-        if (!DIVISION_POLYNOM)
-            throw "Error: Polynomdivision not possible, DIVISION_POLYNOM not set!";
-
-        // create temporary polynom with 2*_MaxLength
-        // this is the maximum grad the *-Operation can create
-        Polynom<_MaxDegree * 2, _BaseValue> tmp;
-
-        // calculate "multiplication" into tmp poly
-        for (int i = 0, myDegree = this->degree(), polyDegree = poly.degree(); i <= myDegree; ++i){
-            for (int k = 0; k <= polyDegree; ++k)
-                tmp.m_Data[i + k] += poly.m_Data[k] * this->m_Data[i];
-        }
-        tmp._truncateToBaseValue();
-
-        // calculate poly division until tmp.degree() <= _MaxDegree
-        const int divisionDegree = DIVISION_POLYNOM->degree();
-
-        while(tmp > *DIVISION_POLYNOM) {
-            int tmpDegree = tmp.degree();
-            int shift = tmpDegree - divisionDegree;
-            int factor= 1;
-
-            // NOTE:
-            // if factor is always 1 -> factor = tmp.m_Data[tmpDegree];    is faster!
-            while (tmp.m_Data[tmpDegree] != ((factor * DIVISION_POLYNOM->m_Data[divisionDegree]) % _BaseValue) )
-                ++factor;
-
-            for (int i = 0; i < _MaxDegree; ++i)
-                tmp.m_Data[shift + i] -= factor * DIVISION_POLYNOM->m_Data[i];
-
-            tmp._truncateToBaseValue();
-        }
-        MY_TYPE toReturn;
-        for (int i = 0; i < _MaxDegree; ++i)
-            toReturn.m_Data[i] = tmp.m_Data[i];
-
-        return toReturn;
-    }
-    */
 
     friend std::ostream& operator<<(std::ostream& os, const MY_TYPE& poly){
         bool alreadyWrote = false;
