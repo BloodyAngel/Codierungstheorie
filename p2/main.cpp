@@ -27,6 +27,7 @@ void multiplicationTest(const Polynom<_ArraySize, _BaseValue>& div, int _TestLen
         std::cout << "\rProgress: " << iter1 << std::flush;
         auto poly_a = generatePolynom(iter1);
 
+    #pragma omp parallel for
     for (int iter2 = 0; iter2 < _TestLength; ++iter2){
         auto poly_b = generatePolynom(iter2);
 
