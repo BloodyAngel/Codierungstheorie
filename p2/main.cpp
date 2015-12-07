@@ -14,7 +14,7 @@ void multiplicationTest(const Polynom<_ArraySize, _BaseValue>& div, int _TestLen
     Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
 
     // check for error
-    auto generatePolynom23 = [](int value) -> Polynom<_ArraySize, _BaseValue>{
+    auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
         Polynom<_ArraySize, _BaseValue> toReturn;
         for (int i = 0; value; ++i){
             toReturn.m_Data.at(i) = value % _BaseValue;
@@ -25,13 +25,13 @@ void multiplicationTest(const Polynom<_ArraySize, _BaseValue>& div, int _TestLen
 
     for (int iter1 = 0; iter1 < _TestLength; ++iter1){
         std::cout << "\rProgress: " << iter1 << std::flush;
-        auto poly_a = generatePolynom23(iter1);
+        auto poly_a = generatePolynom(iter1);
 
     for (int iter2 = 0; iter2 < _TestLength; ++iter2){
-        auto poly_b = generatePolynom23(iter2);
+        auto poly_b = generatePolynom(iter2);
 
     for (int iter3 = 0; iter3 < _TestLength; ++iter3){
-        auto poly_c = generatePolynom23(iter3);
+        auto poly_c = generatePolynom(iter3);
         auto abc = (poly_a * poly_b) * poly_c;
         auto bca = poly_a * (poly_b  * poly_c);
         if (abc != bca)
@@ -44,7 +44,6 @@ void multiplicationTest(const Polynom<_ArraySize, _BaseValue>& div, int _TestLen
 
 template<int _BaseValue, int _PolySize, typename _Function>
 void createTable(const Polynom<_PolySize, _BaseValue>& divisionPoly, int tableSize, _Function foo){
-    // check for error
     auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
         Polynom<_PolySize, _BaseValue> toReturn;
         for (int i = 0; value; ++i){
@@ -71,22 +70,22 @@ void createTable(const Polynom<_PolySize, _BaseValue>& divisionPoly, int tableSi
 
         auto poly_a = generatePolynom(iter1);
 
-    for (int iter2 = 0; iter2 < tableSize; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-        auto solution = foo(poly_a, poly_b);
-        int val = 0;
-        for (int i = 0; i < solution.m_Data.size(); ++i)
-            val += pow(_BaseValue, i) * solution.m_Data[i];
+        for (int iter2 = 0; iter2 < tableSize; ++iter2){
+            auto poly_b = generatePolynom(iter2);
+            auto solution = foo(poly_a, poly_b);
+            int val = 0;
+            for (int i = 0; i < solution.m_Data.size(); ++i)
+                val += pow(_BaseValue, i) * solution.m_Data[i];
 
 #if defined(INDEX_OUTPUT)
-        std::cout << '\r' << std::string(iter2, '\t') << '|' << val;
+            std::cout << '\r' << std::string(iter2, '\t') << '|' << val;
 #elif defined(NUMBER_OUTPUT)
-        std::cout << '\r' << std::string(iter2, '\t') << '|' << solution;
+            std::cout << '\r' << std::string(iter2, '\t') << '|' << solution;
 #else
 #error "No output set"
 #endif
-    }
-    std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
     std::cout << "\nPress enter to continue";
     getchar();
