@@ -1,0 +1,310 @@
+\documentclass{beamer}
+\usetheme{m}  % Use metropolis theme
+\title{Codierungstheorie - Praktika 1}
+\date{\today}
+\author{Staubach Jan \newline Wombacher Sascha \newline}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[ngerman]{babel}
+%\institute{Centre for Modern Beamer Themes}
+
+\lstset{
+	language=C++,
+    tabsize=4,
+    keepspaces,
+    extendedchars=true,
+    rulecolor=\color{black},
+    basicstyle=\footnotesize,
+    aboveskip=5pt,
+    upquote=true,
+    columns=fixed,
+    showstringspaces=false,
+    extendedchars=true,
+    breaklines=true,
+    frame=single,
+    showtabs=true,
+    showspaces=false,
+    showstringspaces=false,
+    basicstyle=\tiny,
+    keywordstyle=\color{blue}
+}
+
+\begin{document}
+
+  \lstdefinestyle{numbers}
+  {numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt}
+  \lstdefinestyle{nonumbers}
+  {numbers=none}
+
+
+  \maketitle
+  \begin{frame}{Agenda}
+    \setbeamertemplate{section in toc}[sections numbered]
+    \tableofcontents[hideallsubsections]
+  \end{frame}
+
+  \section{Generierung des Huffman-Baums}
+  \begin{frame}{Generierung des Huffman-Baums - \newline Wahrscheinlichkeit eines Zeichen}
+  	\begin{enumerate}
+	  	\item für jedes Zeichen $z$ der Eingabezeichenkette wird die Häufigkeit (Anzahl) errechnet
+	  	\item Anschließend wird diese Anzahl durch die Eingabelänge Normiert (Intervall zwischen (0, 1])
+	\end{enumerate}
+  \end{frame}
+  
+    \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Wahrscheinlichkeit - Programmcode}
+    	\begin{lstlisting}[style=numbers]
+  float numElements = 0;
+  for (auto& e : containerType){
+      bool elementFound = false;
+      for (auto& iter : elementCounter){
+          if (iter->data.first == e){
+              elementFound = true;
+              ++iter->data.second;
+              break;
+          }
+      }
+      if (!elementFound){
+          elementCounter.reserve(1);
+          elementCounter.push_back(std::make_unique<LEAVE>(LEAVE(e, 1.f)));
+      }
+      ++numElements;
+  }
+  elementCounter.shrink_to_fit();
+  for (auto& e : elementCounter)
+      e->data.second /= numElements;
+\end{lstlisting}
+\end{frame}
+    
+  
+  \begin{frame}{Generierung des Huffman-Baums - \newline Baumgenerierung}
+  	\begin{enumerate}
+  		\item Erstelle je ein Node pro Zeichen
+  		\item Sortiere alle Nodes aufsteigend anhand ihrer Wahrscheinlichkeit
+  		\item Verbinde die zwei Nodes mit den geriengsten Wahrscheinlichkeiten
+  		\item Füge das entstehende Node in die Zeichenliste ein \newline (Wahrscheinlichkeit = Summe der einzel Nodes)
+  		\item Stelle die Sortierung wieder her \newline (\textit{insertion sort} - Ansatz)
+  		\item Wiederhole Schritt 3-5 bis nur noch ein Node existiert \newline (=> Tree-Root)
+  	\end{enumerate}
+  \end{frame}
+  
+     \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Baumgenerierung - Programmcode}
+     	\begin{lstlisting}[style=numbers]
+// sort elements
+std::sort(std::begin(elementCounter), std::end(elementCounter), [](const auto& element1, const auto& element2) -> bool{
+    // data.second = symbol probability
+    if (element1->data.second < element2->data.second)
+        return true;
+    return false;
+});
+\end{lstlisting}
+\end{frame}
+  
+     \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Baumgenerierung - Programmcode}
+     	\begin{lstlisting}[style=numbers]
+// create huffman tree
+for (std::size_t i = 0; i < elementCounter.size() - 1; ++i){
+    // pick first 2 elements and stick them together
+    // and stick them into the second element -> last element will be the tree's root
+    std::unique_ptr<NODE>& ptr1 = elementCounter[i];
+    std::unique_ptr<NODE>& ptr2 = elementCounter[i + 1];
+
+    std::unique_ptr<NODE> ptr = std::make_unique<NODE>(ptr1->data.first, ptr1->data.second + ptr2->data.second);
+    ptr-> leftNode = std::move(ptr1);
+    ptr->rightNode = std::move(ptr2);
+
+    ptr2 = std::move(ptr);
+    ptr2->leftNode ->parentNode = ptr2.get();
+    ptr2->rightNode->parentNode = ptr2.get();
+
+    // sort elements again, using the "insertion sort" appraoch
+    for (int iter = i + 1; iter < elementCounter.size() - 1; ++iter){
+        auto& e1 = elementCounter[iter];
+        auto& e2 = elementCounter[iter + 1];
+
+        if (e1->data.second > e2->data.second)
+            std::swap(e1, e2);
+        else
+            break;
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+  
+  \begin{frame}{Generierung des Huffman-Baums - \newline Speicherung} \label{HeaderFile}
+	für die Weiterverarbeitung ist das Speichern des Huffman-Baums ein wichtiger Bestandteil
+  	\begin{enumerate}
+  		\item Ersten 32Bit beschreiben die Anzahl der Zeichen im Baum (Blätter)
+  		\item Die Folgenden 8Bit beschreiben die Länge eines Zeichens \newline (Bsp.: char = 1, int32 = 4)
+  		\item Nehme ein Zeichen aus Huffman-Baum
+  		\item Schreibe die Gesamtlänge des Zeichen + Codierung in die Folgenden 8Bit
+  		\item Schreibe das Zeichen in die Nächsten Bits
+  		\item Schreibe die Codierung des Zeichen in die folge Bits
+  		\item Wiederhole Schritt 3-6 für jedes Zeichen im Huffman-Baum
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Speicherung - Programmcode}
+  	\begin{lstlisting}[style=numbers]
+BitWriter<> writer(output);
+const char* count = reinterpret_cast<const char*>(&leaveCount);
+writer.addByte(count[0]);
+writer.addByte(count[1]);
+writer.addByte(count[2]);
+writer.addByte(count[3]);
+
+for (const _Leave<T>* ptr = this->m_FirstLeave; ptr; ptr = ptr->nextLeave){
+     writer.addByte(8 * (1 + (char)sizeof(T)) + (char)ptr->m_Coding.size());
+
+     // data: first = symbol
+     const char* tmpPtr = reinterpret_cast<const char*>(&ptr->data.first);
+     
+     for (int i = 0; i < sizeof(T); ++i)
+          writer.addByte(tmpPtr[i]);
+
+     writer.addBits(ptr->m_Coding);
+}
+writer.flush();
+\end{lstlisting}
+\end{frame}
+    
+  \section{Zeichencodierung}
+  \begin{frame}{Zeichencodierung}
+  	\begin{enumerate}
+  		\item Generiere pro Zeichen die jeweilige Codierung \newline (von Root gesehen: leftNode = 1, rightNode = 0)
+  		\item Lese ein Zeichen $z$ des Input-Strings
+  		\item Finde die Codierung für $z$
+  		\item Füge die Codierung dem BitWriter hinzu
+  		\item Wiederhole Schritte 2-4 für alle Zeichen des Strings
+  		\item Flush für den BitWriter
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Zeichencodierung - \newline Programmcode Teil 1}
+  	\begin{lstlisting}[style=numbers]
+// rucursive call starting at tree root
+bool isLeave = true;
+if (this->leftNode){
+    isLeave = false;
+    this->leftNode->generateCodings();
+}
+if (this->rightNode){
+    isLeave = false;
+    this->rightNode->generateCodings();
+}
+if (isLeave){
+    _Leave<T2>* THIS = static_cast<_Leave<T2>*>(this);
+    std::vector<bool>& coding = THIS->m_Coding;
+    for (const _Node<T2>* currentPtr = this->parentNode, *previousePtr = this;
+         currentPtr;
+         currentPtr  = currentPtr->parentNode)
+    {
+         // 1 coding left, 0 right
+         if (currentPtr->leftNode.get() == previousePtr)
+             coding.push_back(1);
+         else
+             coding.push_back(0);
+         previousePtr = currentPtr;
+    }
+    // vector is generated by bottom up approach -> inverse its order for top down
+    std::reverse(std::begin(coding), std::end(coding));
+}
+\end{lstlisting}
+\end{frame} 
+  
+  \begin{frame}[fragile]{Zeichencodierung - \newline Programmcode Teil 2}
+  	\begin{lstlisting}[style=numbers]
+BitWriter<> writer(output);
+// generate coding table
+std::array<const _Leave<T>*, 256> table;
+for (auto& e :table)
+     e = nullptr;
+
+for (const _Leave<T>* iter = this->m_FirstLeave; iter; iter = iter->nextLeave)
+    table[iter->data.first] = iter;
+// write symbols
+for (const auto& e : str){
+    if (!table[e])
+        throw "Error, symbol not found in huffmantree";
+
+    writer.addBits(table[e]->m_Coding);
+}
+writer.flush();
+\end{lstlisting}
+\end{frame} 
+  
+  \section{Rekunstruktion des Huffman-Baums}
+  \begin{frame}{Rekunstruktion des Huffman-Baums}
+  	\begin{enumerate}
+  		\item Öffne die erstellte Header-Datei, siehe Folie \textit{\ref{HeaderFile}}
+  		\item Lese \textit{invertert} wie zuvor beschrieben
+  	\end{enumerate}
+  \end{frame}
+  
+  
+  \section{Lesen des codierten Strings}
+  \begin{frame}{Lesen des codierten Strings}
+  	\begin{enumerate}
+  		\item Setze Pointer auf Root
+  		\item Lese ein Bit des Inputstreams (BitReader)
+  		\item Verfolge Pointer anhand des Bits \newline (1: Pointer = Pointer->left, 0: Pointer = Pointer->right)
+  		\item Zeigt der Pointer auf ein Blatt?
+  		\begin{itemize}
+  			\item Wenn Ja : Schreibe Zeichen, setze Pointer auf Root
+  		\end{itemize}
+  		\item Wiederhole Schritt 2 bis 4 für jedes Bit des Inputstreams
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Lesen des codierten Strings - \newline Programmcode} \label{EntropieLesen}
+  	\begin{lstlisting}[style=numbers]
+std::fstream input(filename, std::fstream::in);
+if (!input)
+    throw "Error, file can't be opened for reading";
+
+float bitCount = 0.f;
+float characterCount = 0.f;
+
+BitReader<> reader(input);
+while(reader.good()){
+    std::unique_ptr<_Node<T>>* iter = &this->m_Root;
+
+    // find symbol
+    while((*iter)->leftNode || (*iter)->rightNode){
+        bool left = reader.readBit();
+        ++bitCount;
+
+        if (left)
+            iter = &(*iter)->leftNode;
+        else
+            iter = &(*iter)->rightNode;
+    }
+    container.push_back((*iter)->data.first);
+    ++characterCount;
+}
+std::cout << "Newly calculated entropie: " << bitCount / characterCount << std::endl;
+\end{lstlisting}
+\end{frame}  
+
+\section{Entropie}
+\begin{frame}{Entropie}
+Die Entropie wird auf zwei wegen errechnet und verglichen
+\begin{itemize}
+	\item Wie auf der Folie \ref*{EntropieLesen} zu erkennen
+	\begin{itemize}
+	\item Zähle die verwendeten bits
+	\item Dividire diese durch die Anzahl der erhaltenen Zeichen
+	\end{itemize}
+	
+	\item Errechnung nach der Huffman-Baum Generierung
+	\begin{itemize}
+	\item Berechne die Einzelwahrscheinlichkeiten jedes Zeichens
+	\item Multipliziere dies mit der Codierlänge des Zeichens
+	\item Die Aufaddierung dieser entspricht die Entropie
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section*{Vielen Dank für die Aufmerksamkeit!}
+  
+\end{document}
