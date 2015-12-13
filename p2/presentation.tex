@@ -1,0 +1,211 @@
+\documentclass{beamer}
+\usetheme{m}  % Use metropolis theme
+\title{Codierungstheorie - Praktika 2}
+\date{\today}
+\author{Wombacher Sascha \newline}
+\usepackage{float}
+\usepackage{listings}
+\usepackage[ngerman]{babel}
+
+\lstset{
+	language=C++,
+    tabsize=4,
+    keepspaces,
+    extendedchars=true,
+    rulecolor=\color{black},
+    basicstyle=\footnotesize,
+    aboveskip=5pt,
+    upquote=true,
+    columns=fixed,
+    showstringspaces=false,
+    extendedchars=true,
+    breaklines=true,
+    frame=single,
+    showtabs=true,
+    showspaces=false,
+    showstringspaces=false,
+    basicstyle=\tiny,
+    keywordstyle=\color{blue}
+}
+
+\begin{document}
+
+  \lstdefinestyle{numbers}
+  {numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt}
+  \lstdefinestyle{nonumbers}
+  {numbers=none}
+
+
+  \maketitle
+  \begin{frame}{Agenda}
+    \setbeamertemplate{section in toc}[sections numbered]
+    \tableofcontents[hideallsubsections]
+  \end{frame}
+
+  \section{Datenstrukturwahl}
+  \begin{frame}{Datenstruktur \newline - std::Array im Vergleich zu std::Vector}
+  	\begin{enumerate}
+	  	\item Als Grunddatenstruktur wurde ein std::Array gewählt
+	  	\item Nachteile:
+	  	\begin{enumerate}
+		  	\item Feste Arraylänge ist für größer werdende Polynome ungeeignet
+		  	\item Die Abfrage des Grades benötigt im worst-case \newline O(N), N = ArrayLänge
+		  	\item Höherer Speicherverbrauch (viele 0en)
+		  	\item Tendenziell langsamer
+	  	\end{enumerate}
+	  	\item Vorteile:
+	  	\begin{enumerate}
+		  	\item Erhöhung des Grades erstellt kein zweites Array \newline (verglichen mit std::vector, worst case)
+		  	\item Jeder nimmt std::vector => mal was anderes :D
+		  	\item Bischen mehr template programming :)
+	  	\end{enumerate}
+	\end{enumerate}
+  \end{frame}
+  
+  \section{Modulare Polynommultiplikation}
+    \begin{frame}{Modulare Polynommultiplikation \newline - Algorithmen Beschreibung}
+		Bekannte Parameter: Poly1, Poly2, DivPoly, PolyBasis
+    	\begin{enumerate}
+  	  	\item Berechne: Poly1 * Poly2, in temporäres Array (Tmp)
+  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
+  	  	\item Solange Tmp.Grad >= DivPoly.Grad
+  	  	\begin{enumerate}
+	  	  	\item Berechne Additions-Faktor F, mit F = PolyBasis - Tmp.Grad \newline (gilt nur wenn DivPoly[DivPoly.Grad] == 1 ist)
+	  	  	\item Berechne Shift S, mit S = Tmp.Grad - DivPoly.Grad
+	  	  	\item Addiere Komponentenweise das "geshiftete" DivPoly zu Tmp
+	  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
+  	  	\end{enumerate}
+  	  	\item gib Tmp zurück
+  	  	\end{enumerate}
+    \end{frame}
+    
+    \begin{frame}[fragile]{Modulare Polynommultiplikation \newline - Programmcode}
+    	\begin{lstlisting}[style=numbers]
+// create temporary polynom with 2*_MaxLength
+// this is the maximum grad the *-Operation can create
+Polynom<_MaxDegree * 2, _BaseValue> tmp, tmpResult;
+
+// calculate "multiplication" into tmp poly
+for (int i = 0, myDegree = this->degree(), polyDegree = poly.degree(); i <= myDegree; ++i){
+    for (int k = 0; k <= polyDegree; ++k)
+        tmpResult.m_Data[i + k] += poly.m_Data[k] * this->m_Data[i];
+}
+tmpResult._truncateToBaseValue();
+const int divisionDegree = DIVISION_POLYNOM->degree();
+for (int tmpResDegree = tmpResult.degree(); tmpResDegree >= divisionDegree; tmpResDegree = tmpResult.degree()){
+    int factor = _BaseValue - tmpResult.m_Data[tmpResDegree];
+    int shift = tmpResDegree - divisionDegree;
+
+    for (int i = 0; i <= divisionDegree; ++i)
+        tmpResult.m_Data[shift + i] += factor * DIVISION_POLYNOM->m_Data[i];
+    tmpResult._truncateToBaseValue();
+}
+MY_TYPE toReturn;
+for (int i = 0; i < _MaxDegree; ++i)
+    toReturn.m_Data[i] = tmpResult.m_Data[i];
+
+// return "shrinked" result
+return toReturn;
+\end{lstlisting}
+\end{frame}
+
+    \begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung, Seite 1}
+	    Für diese Aufgabe werden irreduzieblen Polynome aus Aufgabe 4 verwendet
+    	\begin{itemize}
+  	  	\item Überführe eine Ganzzahl in ein Polynom
+  	  	\begin{enumerate}
+	  	  	\item Erstelle einen Iterator $i = 0$
+	  	  	\item Schreibe an Arrayposition $i$ das Modulo der Ganzzahl mit der Polynombasis \label{IterStart}
+	  	  	\item Dividiere die Ganzzahl durch die Polynombasis
+	  	  	\item Inkrementiere $i$ \label{IterEnd}
+	  	  	\item Wiederhole Schritt \ref*{IterStart} - \ref*{IterEnd} solange Ganzzahl > 0 gilt
+  	  	\end{enumerate}
+  	  	\end{itemize}
+    \end{frame}
+    
+    \begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung, Seite 2}
+		Iteriere über drei (unabhängige) Iteratoren \newline  $iter1, iter2, iter3 \epsilon [0, TableSize - 1]$
+      	\begin{enumerate}
+	    	\item Konvertiere Iterator $iter1$ in Polynom \textit{Poly1}
+	    	\item Konvertiere Iterator $iter2$ in Polynom \textit{Poly2}
+	    	\item Konvertiere Iterator $iter3$ in Polynom \textit{Poly3}
+	    	\item Erstelle $Poly4 = (Poly1 *  Poly2) * Poly3$
+	    	\item Erstelle $Poly5 =  Poly1 * (Poly2  * Poly3)$
+	    	\item Wenn $Poly4 \neq Poly5$ gilt, wirf Exception
+      	\end{enumerate}
+   \end{frame}
+    
+    \begin{frame}[fragile]{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
+    	\begin{lstlisting}[style=numbers]
+Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div; // set division poly
+auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
+    Polynom<_ArraySize, _BaseValue> toReturn;
+    for (int i = 0; value; ++i){
+        toReturn.m_Data.at(i) = value % _BaseValue;
+        value /= _BaseValue;
+    }
+    return toReturn;
+};
+// check for error
+for (int iter1 = 0; iter1 < _TestLength; ++iter1){
+    auto poly1 = generatePolynom(iter1);
+
+    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
+        auto poly2 = generatePolynom(iter2);
+
+        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
+            auto poly3 = generatePolynom(iter3);
+            
+            auto poly4 = (poly1 * poly2) * poly3;
+            auto poly5 = poly1 * (poly2  * poly3);
+            if (poly4 != poly5)
+                throw std::runtime_error("Error: wrong implementation");
+        }
+    }
+}
+std::cout << "\rmultiplication found no errors" << std::endl;
+\end{lstlisting}
+\end{frame}
+
+	\section{Tabellengenerierung}
+    \begin{frame}{Tabellengenerierung - \newline Beschreibung}
+    	Iteriere über zwei (unabhängige) Iteratoren \newline $iter1, iter2 \epsilon [0, TableSize - 1]$
+    	\begin{enumerate}
+  	  	\item Konvertiere Iterator $iter1$ in Polynom \textit{Poly1}
+  	  	\item Konvertiere Iterator $iter2$ in Polynom \textit{Poly2}
+  	  	\item Gib $poly1 * poly2$ aus
+  	  	\end{enumerate}
+    \end{frame}
+    
+    \begin{frame}[fragile]{Tabellengenerierung - \newline Programmcode}
+	    Anmerkung: Teile des Programmcodes (Tabllenlienien) \newline wurden entfert (ansonsten genügt eine Folie nicht)
+    	\begin{lstlisting}[style=numbers]
+// generate polynoms from int-iterator
+auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
+    Polynom<_PolySize, _BaseValue> toReturn;
+    for (int i = 0; value; ++i){
+        toReturn.m_Data[i] = value % _BaseValue;
+        value /= _BaseValue;
+    }
+    return toReturn;
+};
+Polynom<_PolySize, _BaseValue>::DIVISION_POLYNOM = &divisionPoly;
+
+// table itself
+for (int iter1 = 0; iter1 < tableSize; ++iter1){
+    auto poly1 = generatePolynom(iter1);
+
+    for (int iter2 = 0; iter2 < tableSize; ++iter2){
+        auto poly2 = generatePolynom(iter2);
+
+        // foo is a function which perforams addition or multiplication
+        std::cout << foo(poly1, poly2);
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+
+\section*{Vielen Dank für die Aufmerksamkeit!}
+  
+\end{document}

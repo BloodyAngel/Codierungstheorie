@@ -1,5 +1,7 @@
 \beamer@endinputifotherversion {3.36pt}
 \select@language {ngerman}
-\beamer@sectionintoc {1}{Datenstrukturwahl}{3}{0}{1}
-\beamer@sectionintoc {2}{Modulare Polynommultiplikation}{5}{0}{2}
-\beamer@sectionintoc {3}{Tabellengenerierung}{10}{0}{3}
+\beamer@sectionintoc {1}{Generierung des Huffman-Baums}{3}{0}{1}
+\beamer@sectionintoc {2}{Zeichencodierung}{11}{0}{2}
+\beamer@sectionintoc {3}{Rekunstruktion des Huffman-Baums}{15}{0}{3}
+\beamer@sectionintoc {4}{Lesen des codierten Strings}{17}{0}{4}
+\beamer@sectionintoc {5}{Entropie}{20}{0}{5}

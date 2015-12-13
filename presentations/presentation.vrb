@@ -1,26 +1,29 @@
-\frametitle{Tabellengenerierung - \newline Programmcode}
-Anmerkung: Teile des Programmcodes (Tabllenlienien) \newline wurden entfert (ansonsten genügt eine Folie nicht)
-    ^^I\begin{lstlisting}[style=numbers]
-// generate polynoms from int-iterator
-auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
-    Polynom<_PolySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data[i] = value % _BaseValue;
-        value /= _BaseValue;
+\frametitle{Lesen des codierten Strings - \newline Programmcode}
+\label{EntropieLesen}
+  ^^I\begin{lstlisting}[style=numbers]
+std::fstream input(filename, std::fstream::in);
+if (!input)
+    throw "Error, file can't be opened for reading";
+
+float bitCount = 0.f;
+float characterCount = 0.f;
+
+BitReader<> reader(input);
+while(reader.good()){
+    std::unique_ptr<_Node<T>>* iter = &this->m_Root;
+
+    // find symbol
+    while((*iter)->leftNode || (*iter)->rightNode){
+        bool left = reader.readBit();
+        ++bitCount;
+
+        if (left)
+            iter = &(*iter)->leftNode;
+        else
+            iter = &(*iter)->rightNode;
     }
-    return toReturn;
-};
-Polynom<_PolySize, _BaseValue>::DIVISION_POLYNOM = &divisionPoly;
-
-// table itself
-for (int iter1 = 0; iter1 < tableSize; ++iter1){
-    auto poly_a = generatePolynom(iter1);
-
-    for (int iter2 = 0; iter2 < tableSize; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-
-        // foo is a function which perforams addition or multiplication
-        std::cout << foo(poly_a, poly_b);
-    }
+    container.push_back((*iter)->data.first);
+    ++characterCount;
 }
+std::cout << "Newly calculated entropie: " << bitCount / characterCount << std::endl;
 \end{lstlisting}

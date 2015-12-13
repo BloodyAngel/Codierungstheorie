@@ -1,11 +1,12 @@
 \documentclass{beamer}
 \usetheme{m}  % Use metropolis theme
-\title{Codierungstheorie - Praktika 2}
+\title{Codierungstheorie - Praktika 1}
 \date{\today}
 \author{Wombacher Sascha \newline}
 \usepackage{float}
 \usepackage{listings}
 \usepackage[ngerman]{babel}
+%\institute{Centre for Modern Beamer Themes}
 
 \lstset{
 	language=C++,
@@ -42,146 +43,267 @@
     \tableofcontents[hideallsubsections]
   \end{frame}
 
-  \section{Datenstrukturwahl}
-  \begin{frame}{Datenstruktur \newline - std::Array im Vergleich zu std::Vector}
+  \section{Generierung des Huffman-Baums}
+  \begin{frame}{Generierung des Huffman-Baums - \newline Wahrscheinlichkeit eines Zeichen}
   	\begin{enumerate}
-	  	\item Als Grunddatenstruktur wurde ein std::Array gewählt
-	  	\item Nachteile:
-	  	\begin{enumerate}
-		  	\item Feste Arraylänge ist für größer werdende Polynome ungeeignet
-		  	\item Die Abfrage des Grades benötigt im worst-case \newline O(N), N = ArrayLänge
-		  	\item Höherer Speicherverbrauch (viele 0en)
-		  	\item Tendenziell langsamer
-	  	\end{enumerate}
-	  	\item Vorteile:
-	  	\begin{enumerate}
-		  	\item Erhöhung des Grades erstellt kein zweites Array \newline (verglichen mit std::vector, worst case)
-		  	\item Jeder nimmt std::vector => mal was anderes :D
-		  	\item Bischen mehr template programming :)
-	  	\end{enumerate}
+	  	\item für jedes Zeichen $z$ der Eingabezeichenkette wird die Häufigkeit (Anzahl) errechnet
+	  	\item Anschließend wird diese Anzahl durch die Eingabelänge Normiert (Intervall zwischen (0, 1])
 	\end{enumerate}
   \end{frame}
   
-  \section{Modulare Polynommultiplikation}
-    \begin{frame}{Modulare Polynommultiplikation \newline - Algorithmen Beschreibung}
-		Bekannte Parameter: Poly1, Poly2, DivPoly, PolyBasis
-    	\begin{enumerate}
-  	  	\item Berechne: Poly1 * Poly2, in temporäres Array (Tmp)
-  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
-  	  	\item Solange Tmp.Grad >= DivPoly.Grad
-  	  	\begin{enumerate}
-	  	  	\item Berechne Additions-Faktor F, mit F = PolyBasis - Tmp.Grad \newline (gilt nur wenn DivPoly[DivPoly.Grad] == 1 ist)
-	  	  	\item Berechne Shift S, mit S = Tmp.Grad - DivPoly.Grad
-	  	  	\item Addiere Komponentenweise das "geshiftete" DivPoly zu Tmp
-	  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
-  	  	\end{enumerate}
-  	  	\item gib Tmp zurück
-  	  	\end{enumerate}
-    \end{frame}
-    
-    \begin{frame}[fragile]{Modulare Polynommultiplikation \newline - Programmcode}
+    \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Wahrscheinlichkeit - Programmcode}
     	\begin{lstlisting}[style=numbers]
-// create temporary polynom with 2*_MaxLength
-// this is the maximum grad the *-Operation can create
-Polynom<_MaxDegree * 2, _BaseValue> tmp, tmpResult;
-
-// calculate "multiplication" into tmp poly
-for (int i = 0, myDegree = this->degree(), polyDegree = poly.degree(); i <= myDegree; ++i){
-    for (int k = 0; k <= polyDegree; ++k)
-        tmpResult.m_Data[i + k] += poly.m_Data[k] * this->m_Data[i];
-}
-tmpResult._truncateToBaseValue();
-const int divisionDegree = DIVISION_POLYNOM->degree();
-for (int tmpResDegree = tmpResult.degree(); tmpResDegree >= divisionDegree; tmpResDegree = tmpResult.degree()){
-    int factor = _BaseValue - tmpResult.m_Data[tmpResDegree];
-    int shift = tmpResDegree - divisionDegree;
-
-    for (int i = 0; i <= divisionDegree; ++i)
-        tmpResult.m_Data[shift + i] += factor * DIVISION_POLYNOM->m_Data[i];
-    tmpResult._truncateToBaseValue();
-}
-MY_TYPE toReturn;
-for (int i = 0; i < _MaxDegree; ++i)
-    toReturn.m_Data[i] = tmpResult.m_Data[i];
-
-// return "shrinked" result
-return toReturn;
+  float numElements = 0;
+  for (auto& e : containerType){
+      bool elementFound = false;
+      for (auto& iter : elementCounter){
+          if (iter->data.first == e){
+              elementFound = true;
+              ++iter->data.second;
+              break;
+          }
+      }
+      if (!elementFound){
+          elementCounter.reserve(1);
+          elementCounter.push_back(std::make_unique<LEAVE>(LEAVE(e, 1.f)));
+      }
+      ++numElements;
+  }
+  elementCounter.shrink_to_fit();
+  for (auto& e : elementCounter)
+      e->data.second /= numElements;
 \end{lstlisting}
 \end{frame}
-
-    \begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung}
-	    Hierfür werden die irreduzieblen Polynome aus Aufgabe 4 verwendet
-    	\begin{enumerate}
-  	  	\item TODO
-  	  	\end{enumerate}
-    \end{frame}
     
-    \begin{frame}[fragile]{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
-    	\begin{lstlisting}[style=numbers]
-Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
-auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
-    Polynom<_ArraySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data.at(i) = value % _BaseValue;
-        value /= _BaseValue;
-    }
-    return toReturn;
-};
-// check for error
-for (int iter1 = 0; iter1 < _TestLength; ++iter1){
-    auto poly_a = generatePolynom(iter1);
-
-    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-
-        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
-            auto poly_c = generatePolynom(iter3);
-            auto abc = (poly_a * poly_b) * poly_c;
-            auto bca = poly_a * (poly_b  * poly_c);
-            if (abc != bca)
-                throw std::runtime_error("Error: wrong implementation");
-        }
-    }
-}
-std::cout << "\rmultiplication found no errors" << std::endl;
+  
+  \begin{frame}{Generierung des Huffman-Baums - \newline Baumgenerierung}
+  	\begin{enumerate}
+  		\item Erstelle je ein Node pro Zeichen
+  		\item Sortiere alle Nodes aufsteigend anhand ihrer Wahrscheinlichkeit
+  		\item Verbinde die zwei Nodes mit den geriengsten Wahrscheinlichkeiten
+  		\item Füge das entstehende Node in die Zeichenliste ein \newline (Wahrscheinlichkeit = Summe der einzel Nodes)
+  		\item Stelle die Sortierung wieder her \newline (\textit{insertion sort} - Ansatz)
+  		\item Wiederhole Schritt 3-5 bis nur noch ein Node existiert \newline (=> Tree-Root)
+  	\end{enumerate}
+  \end{frame}
+  
+     \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Baumgenerierung - Programmcode}
+     	\begin{lstlisting}[style=numbers]
+// sort elements
+std::sort(std::begin(elementCounter), std::end(elementCounter), [](const auto& element1, const auto& element2) -> bool{
+    // data.second = symbol probability
+    if (element1->data.second < element2->data.second)
+        return true;
+    return false;
+});
 \end{lstlisting}
 \end{frame}
+  
+     \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Baumgenerierung - Programmcode}
+     	\begin{lstlisting}[style=numbers]
+// create huffman tree
+for (std::size_t i = 0; i < elementCounter.size() - 1; ++i){
+    // pick first 2 elements and stick them together
+    // and stick them into the second element -> last element will be the tree's root
+    std::unique_ptr<NODE>& ptr1 = elementCounter[i];
+    std::unique_ptr<NODE>& ptr2 = elementCounter[i + 1];
 
-	\section{Tabellengenerierung}
-    \begin{frame}{Tabellengenerierung - \newline Beschreibung}
-    	\begin{enumerate}
-  	  	\item TODO
-  	  	\end{enumerate}
-    \end{frame}
-    
-    \begin{frame}[fragile]{Tabellengenerierung - \newline Programmcode}
-	    Anmerkung: Teile des Programmcodes (Tabllenlienien) \newline wurden entfert (ansonsten genügt eine Folie nicht)
-    	\begin{lstlisting}[style=numbers]
-// generate polynoms from int-iterator
-auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
-    Polynom<_PolySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data[i] = value % _BaseValue;
-        value /= _BaseValue;
-    }
-    return toReturn;
-};
-Polynom<_PolySize, _BaseValue>::DIVISION_POLYNOM = &divisionPoly;
+    std::unique_ptr<NODE> ptr = std::make_unique<NODE>(ptr1->data.first, ptr1->data.second + ptr2->data.second);
+    ptr-> leftNode = std::move(ptr1);
+    ptr->rightNode = std::move(ptr2);
 
-// table itself
-for (int iter1 = 0; iter1 < tableSize; ++iter1){
-    auto poly_a = generatePolynom(iter1);
+    ptr2 = std::move(ptr);
+    ptr2->leftNode ->parentNode = ptr2.get();
+    ptr2->rightNode->parentNode = ptr2.get();
 
-    for (int iter2 = 0; iter2 < tableSize; ++iter2){
-        auto poly_b = generatePolynom(iter2);
+    // sort elements again, using the "insertion sort" appraoch
+    for (int iter = i + 1; iter < elementCounter.size() - 1; ++iter){
+        auto& e1 = elementCounter[iter];
+        auto& e2 = elementCounter[iter + 1];
 
-        // foo is a function which perforams addition or multiplication
-        std::cout << foo(poly_a, poly_b);
+        if (e1->data.second > e2->data.second)
+            std::swap(e1, e2);
+        else
+            break;
     }
 }
 \end{lstlisting}
 \end{frame}
 
+  
+  \begin{frame}{Generierung des Huffman-Baums - \newline Speicherung} \label{HeaderFile}
+	für die Weiterverarbeitung ist das Speichern des Huffman-Baums ein wichtiger Bestandteil
+  	\begin{enumerate}
+  		\item Ersten 32Bit beschreiben die Anzahl der Zeichen im Baum (Blätter)
+  		\item Die Folgenden 8Bit beschreiben die Länge eines Zeichens \newline (Bsp.: char = 1, int32 = 4)
+  		\item Nehme ein Zeichen aus Huffman-Baum
+  		\item Schreibe die Gesamtlänge des Zeichen + Codierung in die Folgenden 8Bit
+  		\item Schreibe das Zeichen in die Nächsten Bits
+  		\item Schreibe die Codierung des Zeichen in die folge Bits
+  		\item Wiederhole Schritt 3-6 für jedes Zeichen im Huffman-Baum
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Generierung des Huffman-Baums - \newline Speicherung - Programmcode}
+  	\begin{lstlisting}[style=numbers]
+BitWriter<> writer(output);
+const char* count = reinterpret_cast<const char*>(&leaveCount);
+writer.addByte(count[0]);
+writer.addByte(count[1]);
+writer.addByte(count[2]);
+writer.addByte(count[3]);
+
+for (const _Leave<T>* ptr = this->m_FirstLeave; ptr; ptr = ptr->nextLeave){
+     writer.addByte(8 * (1 + (char)sizeof(T)) + (char)ptr->m_Coding.size());
+
+     // data: first = symbol
+     const char* tmpPtr = reinterpret_cast<const char*>(&ptr->data.first);
+     
+     for (int i = 0; i < sizeof(T); ++i)
+          writer.addByte(tmpPtr[i]);
+
+     writer.addBits(ptr->m_Coding);
+}
+writer.flush();
+\end{lstlisting}
+\end{frame}
+    
+  \section{Zeichencodierung}
+  \begin{frame}{Zeichencodierung}
+  	\begin{enumerate}
+  		\item Generiere pro Zeichen die jeweilige Codierung \newline (von Root gesehen: leftNode = 1, rightNode = 0)
+  		\item Lese ein Zeichen $z$ des Input-Strings
+  		\item Finde die Codierung für $z$
+  		\item Füge die Codierung dem BitWriter hinzu
+  		\item Wiederhole Schritte 2-4 für alle Zeichen des Strings
+  		\item Flush für den BitWriter
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Zeichencodierung - \newline Programmcode Teil 1}
+  	\begin{lstlisting}[style=numbers]
+// rucursive call starting at tree root
+bool isLeave = true;
+if (this->leftNode){
+    isLeave = false;
+    this->leftNode->generateCodings();
+}
+if (this->rightNode){
+    isLeave = false;
+    this->rightNode->generateCodings();
+}
+if (isLeave){
+    _Leave<T2>* THIS = static_cast<_Leave<T2>*>(this);
+    std::vector<bool>& coding = THIS->m_Coding;
+    for (const _Node<T2>* currentPtr = this->parentNode, *previousePtr = this;
+         currentPtr;
+         currentPtr  = currentPtr->parentNode)
+    {
+         // 1 coding left, 0 right
+         if (currentPtr->leftNode.get() == previousePtr)
+             coding.push_back(1);
+         else
+             coding.push_back(0);
+         previousePtr = currentPtr;
+    }
+    // vector is generated by bottom up approach -> inverse its order for top down
+    std::reverse(std::begin(coding), std::end(coding));
+}
+\end{lstlisting}
+\end{frame} 
+  
+  \begin{frame}[fragile]{Zeichencodierung - \newline Programmcode Teil 2}
+  	\begin{lstlisting}[style=numbers]
+BitWriter<> writer(output);
+// generate coding table
+std::array<const _Leave<T>*, 256> table;
+for (auto& e :table)
+     e = nullptr;
+
+for (const _Leave<T>* iter = this->m_FirstLeave; iter; iter = iter->nextLeave)
+    table[iter->data.first] = iter;
+// write symbols
+for (const auto& e : str){
+    if (!table[e])
+        throw "Error, symbol not found in huffmantree";
+
+    writer.addBits(table[e]->m_Coding);
+}
+writer.flush();
+\end{lstlisting}
+\end{frame} 
+  
+  \section{Rekunstruktion des Huffman-Baums}
+  \begin{frame}{Rekunstruktion des Huffman-Baums}
+  	\begin{enumerate}
+  		\item Öffne die erstellte Header-Datei, siehe Folie \textit{\ref{HeaderFile}}
+  		\item Lese \textit{invertert} wie zuvor beschrieben
+  	\end{enumerate}
+  \end{frame}
+  
+  
+  \section{Lesen des codierten Strings}
+  \begin{frame}{Lesen des codierten Strings}
+  	\begin{enumerate}
+  		\item Setze Pointer auf Root
+  		\item Lese ein Bit des Inputstreams (BitReader)
+  		\item Verfolge Pointer anhand des Bits \newline (1: Pointer = Pointer->left, 0: Pointer = Pointer->right)
+  		\item Zeigt der Pointer auf ein Blatt?
+  		\begin{itemize}
+  			\item Wenn Ja : Schreibe Zeichen, setze Pointer auf Root
+  		\end{itemize}
+  		\item Wiederhole Schritt 2 bis 4 für jedes Bit des Inputstreams
+  	\end{enumerate}
+  \end{frame}
+  
+  \begin{frame}[fragile]{Lesen des codierten Strings - \newline Programmcode} \label{EntropieLesen}
+  	\begin{lstlisting}[style=numbers]
+std::fstream input(filename, std::fstream::in);
+if (!input)
+    throw "Error, file can't be opened for reading";
+
+float bitCount = 0.f;
+float characterCount = 0.f;
+
+BitReader<> reader(input);
+while(reader.good()){
+    std::unique_ptr<_Node<T>>* iter = &this->m_Root;
+
+    // find symbol
+    while((*iter)->leftNode || (*iter)->rightNode){
+        bool left = reader.readBit();
+        ++bitCount;
+
+        if (left)
+            iter = &(*iter)->leftNode;
+        else
+            iter = &(*iter)->rightNode;
+    }
+    container.push_back((*iter)->data.first);
+    ++characterCount;
+}
+std::cout << "Newly calculated entropie: " << bitCount / characterCount << std::endl;
+\end{lstlisting}
+\end{frame}  
+
+\section{Entropie}
+\begin{frame}{Entropie}
+Die Entropie wird auf zwei wegen errechnet und verglichen
+\begin{itemize}
+	\item Wie auf der Folie \ref*{EntropieLesen} zu erkennen
+	\begin{itemize}
+	\item Zähle die verwendeten bits
+	\item Dividire diese durch die Anzahl der erhaltenen Zeichen
+	\end{itemize}
+	
+	\item Errechnung nach der Huffman-Baum Generierung
+	\begin{itemize}
+	\item Berechne die Einzelwahrscheinlichkeiten jedes Zeichens
+	\item Multipliziere dies mit der Codierlänge des Zeichens
+	\item Die Aufaddierung dieser entspricht die Entropie
+	\end{itemize}
+\end{itemize}
+\end{frame}
 
 \section*{Vielen Dank für die Aufmerksamkeit!}
   
