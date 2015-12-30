@@ -135,10 +135,12 @@ public:
             std::unique_ptr<NODE>& ptr1 = elementCounter[i];
             std::unique_ptr<NODE>& ptr2 = elementCounter[i + 1];
 
+            // create combined element
             std::unique_ptr<NODE> ptr = std::make_unique<NODE>(ptr1->data.first, ptr1->data.second + ptr2->data.second);
             ptr-> leftNode = std::move(ptr1);
             ptr->rightNode = std::move(ptr2);
 
+            // write combined elemnt in right element
             ptr2 = std::move(ptr);
             ptr2->leftNode ->parentNode = ptr2.get();
             ptr2->rightNode->parentNode = ptr2.get();
@@ -297,7 +299,9 @@ public:
             container.push_back((*iter)->data.first);
             ++characterCount;
         }
-        std::cout << "Newly calculated entropie: " << bitCount / characterCount << std::endl;
+        std::cout << "\nBit count: " << (int)bitCount << std::endl
+                  << "Symbol count: " << (int)characterCount << std::endl
+                  << "Average symbol length: " << bitCount / characterCount << std::endl << std::endl;
     }
 
     void writeHeaderToFile(std::experimental::string_view fileName){
@@ -384,11 +388,11 @@ public:
         writer.flush();
     }
 
-
     float calculateEntropie(){
         float toReturn = 0.f;
         for (const _Leave<T>* ptr = this->m_FirstLeave; ptr; ptr = ptr->nextLeave)
-            toReturn += ptr->data.second * ptr->m_Coding.size() ;
+            //toReturn += - ptr->data.second * ptr->m_Coding.size(); <= wrong
+            toReturn += -1.f * std::log2(ptr->data.second) * ptr->data.second;
 
         return toReturn;
     }

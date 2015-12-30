@@ -5,8 +5,8 @@
 #include <exception>
 #include <math.h>
 
-//#define INDEX_OUTPUT
-#define NUMBER_OUTPUT
+#define INDEX_OUTPUT
+//#define NUMBER_OUTPUT
 
 
 template<int _ArraySize, int _BaseValue>
@@ -96,7 +96,7 @@ void createTable(const Polynom<_PolySize, _BaseValue>& divisionPoly, int tableSi
 
 int main(int argc, char** argv){
     std::cout << R"abc(Perform "(a * b) * c == a * (b * c)" test)abc" << std::endl;
-
+/*
     std::cout << "\nStarting test in base 2\n";
     constexpr int TABLE_SIZE = 100;
     Polynom<7, 2> testDiv_2;
@@ -118,7 +118,7 @@ int main(int argc, char** argv){
     multiplicationTest(testDiv_5, TABLE_SIZE);
     testDiv_5 = { 1, 0, 3, 2 };
     multiplicationTest(testDiv_5, TABLE_SIZE);
-
+*/
     std::cout << "\nAll tests finished without fails\ncontinue with enter" << std::endl;
     getchar();
 
@@ -137,7 +137,7 @@ int main(int argc, char** argv){
 
 
     system("clear");
-    Polynom<10, 2> division8 = {1, 1, 1};
+    Polynom<10, 2> division8 = {1, 1, 0, 1};
     std::cout << "Addition table: F_(2³), Division poly: " << division8 << std::endl << std::endl;
     createTable(division8, 8, addFoo);
 

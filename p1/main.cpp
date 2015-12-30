@@ -2,28 +2,38 @@
 
 
 
-
 #include "BinaryHuffmanTree.hpp"
 
+#define USE_CHAR_TYPE
+//#define USE_INT_TYPE
 
 
 int main(int argc, char** argv){
-    std::string inputString1 = "Hello Coding!";
+    std::string inputString1 = "aabc";
     if (argc > 1)
         inputString1 = argv[1];
-    std::vector<int> inputString2 = { 0, 0, 0, 0, 1, 1, 1, 2, 2, 3};
+    std::vector<int> inputString2 = { 0, 0, 7, 0, 1, 1, 1, 2, 2, 3 };
 
     std::string outputString1;
     std::vector<int> outputString2;
 
-    typedef char MY_TYPE;
+#if defined(USE_CHAR_TYPE) && defined(USE_INT_TYPE)
+    #error "Please define either USE_CHAR_TYPE or USE_INT_TYPE, and not both!"
+#elif defined(USE_CHAR_TYPE)
+    typedef char USED_TYPE;
     const auto& inputString = inputString1;
     auto& outputString = outputString1;
-
+#elif defined(USE_INT_TYPE)
+    typedef int USED_TYPE;
+    const auto& inputString = inputString2;
+    auto& outputString = outputString2;
+#else
+    #error "Please define either USE_CHAR_TYPE or USE_INT_TYPE"
+#endif
     // generate header/coded file
     {
         std::cout<< "Creating (Binary-)Huffman tree\n\n";
-        BinaryHuffmanTree<MY_TYPE> tree = BinaryHuffmanTree<>::generateHuffmanTree(inputString);
+        BinaryHuffmanTree<USED_TYPE> tree = BinaryHuffmanTree<>::generateHuffmanTree(inputString);
         tree.printLeaves();
         std::cout << "\nEntropie: " << tree.calculateEntropie()
                   << std::endl
@@ -39,11 +49,11 @@ int main(int argc, char** argv){
     // read header and regenerate coded file
     {
         std::cout << "\nreading header file\n";
-        BinaryHuffmanTree<MY_TYPE> tree1 = BinaryHuffmanTree<MY_TYPE>::getHuffmanTreeFromHeader("header.txt");
+        BinaryHuffmanTree<USED_TYPE> tree = BinaryHuffmanTree<USED_TYPE>::getHuffmanTreeFromHeader("header.txt");
 
-        tree1.printLeaves();
+        tree.printLeaves();
         std::cout << "\nparsing code\n";
-        tree1.parseCode("coding.txt", outputString);
+        tree.parseCode("coding.txt", outputString);
     }
 
     std::cout << "encoded text:\n\n";
