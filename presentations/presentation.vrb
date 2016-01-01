@@ -23,6 +23,9 @@ for (int iter1 = 0; iter1 < _TestLength; ++iter1){
             if (abc != bca)
                 throw std::runtime_error("Error: wrong implementation");
         }
+    container.push_back((*iter)->data.first);
+    ++characterCount;
+}
     }
 }
 std::cout << "\rmultiplication found no errors" << std::endl;
