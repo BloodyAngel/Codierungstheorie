@@ -1,26 +1,29 @@
-\frametitle{Tabellengenerierung - \newline Programmcode}
-Anmerkung: Teile des Programmcodes (Tabllenlienien) \newline wurden entfert (ansonsten genügt eine Folie nicht)
-    ^^I\begin{lstlisting}[style=numbers]
-// generate polynoms from int-iterator
-auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
-    Polynom<_PolySize, _BaseValue> toReturn;
+\frametitle{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
+\begin{lstlisting}[style=numbers]
+Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
+auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
+Polynom<_ArraySize, _BaseValue> toReturn;
     for (int i = 0; value; ++i){
-        toReturn.m_Data[i] = value % _BaseValue;
+        toReturn.m_Data.at(i) = value % _BaseValue;
         value /= _BaseValue;
     }
     return toReturn;
 };
-Polynom<_PolySize, _BaseValue>::DIVISION_POLYNOM = &divisionPoly;
-
-// table itself
-for (int iter1 = 0; iter1 < tableSize; ++iter1){
+// check for error
+for (int iter1 = 0; iter1 < _TestLength; ++iter1){
     auto poly_a = generatePolynom(iter1);
 
-    for (int iter2 = 0; iter2 < tableSize; ++iter2){
+    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
         auto poly_b = generatePolynom(iter2);
 
-        // foo is a function which perforams addition or multiplication
-        std::cout << foo(poly_a, poly_b);
+        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
+            auto poly_c = generatePolynom(iter3);
+            auto abc = (poly_a * poly_b) * poly_c;
+            auto bca = poly_a * (poly_b  * poly_c);
+            if (abc != bca)
+                throw std::runtime_error("Error: wrong implementation");
+        }
     }
 }
+std::cout << "\rmultiplication found no errors" << std::endl;
 \end{lstlisting}

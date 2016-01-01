@@ -21,7 +21,7 @@
     extendedchars=true,
     breaklines=true,
     frame=single,
-    showtabs=true,
+%    showtabs=true,
     showspaces=false,
     showstringspaces=false,
     basicstyle=\tiny,
@@ -68,14 +68,14 @@
     	\begin{enumerate}
   	  	\item Berechne: Poly1 * Poly2, in temporäres Array (Tmp)
   	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
-  	  	\item Solange Tmp.Grad >= DivPoly.Grad
+  	  	\item Solange $Tmp.Grad >= DivPoly.Grad$ gilt
   	  	\begin{enumerate}
-	  	  	\item Berechne Additions-Faktor F, mit F = PolyBasis - Tmp.Grad \newline (gilt nur wenn DivPoly[DivPoly.Grad] == 1 ist)
-	  	  	\item Berechne Shift S, mit S = Tmp.Grad - DivPoly.Grad
+	  	  	\item Berechne Additions-Faktor $F$, mit $F = PolyBasis - Tmp.Grad$ \newline (gilt nur wenn DivPoly[DivPoly.Grad] == 1 ist)
+	  	  	\item Berechne Shift $S$, mit $S = Tmp.Grad - DivPoly.Grad$
 	  	  	\item Addiere Komponentenweise das "geshiftete" DivPoly zu Tmp
 	  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
   	  	\end{enumerate}
-  	  	\item gib Tmp zurück
+  	  	\item Ergebnis der Multiplikation: Polynom Tmp
   	  	\end{enumerate}
     \end{frame}
     
@@ -109,49 +109,19 @@ return toReturn;
 \end{lstlisting}
 \end{frame}
 
-    \begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung}
-	    Hierfür werden die irreduzieblen Polynome aus Aufgabe 4 verwendet
-    	\begin{enumerate}
-  	  	\item TODO
-  	  	\end{enumerate}
-    \end{frame}
-    
-    \begin{frame}[fragile]{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
-    	\begin{lstlisting}[style=numbers]
-Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
-auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
-    Polynom<_ArraySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data.at(i) = value % _BaseValue;
-        value /= _BaseValue;
-    }
-    return toReturn;
-};
-// check for error
-for (int iter1 = 0; iter1 < _TestLength; ++iter1){
-    auto poly_a = generatePolynom(iter1);
-
-    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-
-        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
-            auto poly_c = generatePolynom(iter3);
-            auto abc = (poly_a * poly_b) * poly_c;
-            auto bca = poly_a * (poly_b  * poly_c);
-            if (abc != bca)
-                throw std::runtime_error("Error: wrong implementation");
-        }
-    }
-}
-std::cout << "\rmultiplication found no errors" << std::endl;
-\end{lstlisting}
-\end{frame}
-
 	\section{Tabellengenerierung}
-    \begin{frame}{Tabellengenerierung - \newline Beschreibung}
+    \begin{frame}{Tabellengenerierung - \newline Beschreibung}\label{Page_TabelGen}
+	    Die Tabellengenerierung wird durch Überführung eines Iterator zu einem Polynom durchgeführt. \newline
+	    Als Parameter wird ist der Basiswert des Polynoms gegeben. \newline
+    	Konventierung \textit{Iterator - Polynom:}
     	\begin{enumerate}
-  	  	\item TODO
-  	  	\end{enumerate}
+    		\item Erstelle eine ArrayPosition $i = 0$
+    		\item Setze $Poly[ArrayPosition] =$ $Iterator$ $mod$ $Base$ \label{TableGen_LoopStart}
+    		\item Setze $Iterator = Iterator / Base$
+    		\item Inkrementiere die ArrayPosition \label{TableGen_LoopEnd}
+    		\item Wiederhole Schritt \ref*{TableGen_LoopStart} bis \ref*{TableGen_LoopEnd} solange $Iterator > 0$
+    	\end{enumerate}
+    	Durch eine Doppelschleife kann eine Multi-/Additionstabelle generiert und ausgegeben werden
     \end{frame}
     
     \begin{frame}[fragile]{Tabellengenerierung - \newline Programmcode}
@@ -182,6 +152,53 @@ for (int iter1 = 0; iter1 < tableSize; ++iter1){
 \end{lstlisting}
 \end{frame}
 
+
+\begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung}
+	Der Test verwendet die Überführung einer Iteratorposition $Iter$ zu einem Polynom $Poly$, beschrieben auf Folie \ref*{Page_TabelGen}.
+	\begin{enumerate}
+		\item Für alle $i, k, m$ in $[0, TableSize - 1]$
+		\item Erstelle Poly1 = generatePolyFromIter($i$)
+		\item Erstelle Poly2 = generatePolyFromIter($k$)
+		\item Erstelle Poly3 = generatePolyFromIter($m$)
+		\item Wenn $(Poly1 * Poly2) * Poly3 \neq Poly1 * (Poly2 * Poly3)$
+		\begin{itemize}
+			\item Fehler erkannt
+			\item Wirf Exception
+		\end{itemize}
+	\end{enumerate}
+	(Geteste wird jeder überführter Körper von Aufgabe 4)
+\end{frame}
+
+\begin{frame}[fragile]{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
+	\begin{lstlisting}[style=numbers]
+Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
+auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
+Polynom<_ArraySize, _BaseValue> toReturn;
+    for (int i = 0; value; ++i){
+        toReturn.m_Data.at(i) = value % _BaseValue;
+        value /= _BaseValue;
+    }
+    return toReturn;
+};
+// check for error
+for (int iter1 = 0; iter1 < _TestLength; ++iter1){
+    auto poly_a = generatePolynom(iter1);
+
+    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
+        auto poly_b = generatePolynom(iter2);
+
+        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
+            auto poly_c = generatePolynom(iter3);
+            auto abc = (poly_a * poly_b) * poly_c;
+            auto bca = poly_a * (poly_b  * poly_c);
+            if (abc != bca)
+                throw std::runtime_error("Error: wrong implementation");
+        }
+    }
+}
+std::cout << "\rmultiplication found no errors" << std::endl;
+\end{lstlisting}
+\end{frame}
 
 \section*{Vielen Dank für die Aufmerksamkeit!}
   
