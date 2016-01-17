@@ -1,11 +1,14 @@
 \documentclass{beamer}
 \usetheme{m}  % Use metropolis theme
-\title{Codierungstheorie - Praktika 2}
+\title{Codierungstheorie - Praktika 3}
 \date{\today}
 \author{Wombacher Sascha \newline}
 \usepackage{float}
 \usepackage{listings}
+\usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
+
+
 
 \lstset{
 	language=C++,
@@ -41,164 +44,87 @@
     \setbeamertemplate{section in toc}[sections numbered]
     \tableofcontents[hideallsubsections]
   \end{frame}
+  
+  
+  \section{Generatormatrix Allgemein}
+    \begin{frame}{Generatormatrix}
+	\begin{itemize}
+		\item Sind $k \times n$ Matrizen
+		\item Sind Matrizen mit linear unabhängigen Zeilen
+		\item Werden verwendet um eine Nachricht der länge $k$ in ein Codewort der länge $n$ zu überführen (Matrixmultiplikation)
+		\item Jede Zeile ist auch ein Codewort
+  	\end{itemize}
+    \end{frame}
 
-  \section{Datenstrukturwahl}
-  \begin{frame}{Datenstruktur \newline - std::Array im Vergleich zu std::Vector}
-  	\begin{enumerate}
-	  	\item Als Grunddatenstruktur wurde ein std::Array gewählt
-	  	\item Nachteile:
-	  	\begin{enumerate}
-		  	\item Feste Arraylänge ist für größer werdende Polynome ungeeignet
-		  	\item Die Abfrage des Grades benötigt im worst-case \newline O(N), N = ArrayLänge
-		  	\item Höherer Speicherverbrauch (viele 0en)
-		  	\item Tendenziell langsamer
-	  	\end{enumerate}
-	  	\item Vorteile:
-	  	\begin{enumerate}
-		  	\item Erhöhung des Grades erstellt kein zweites Array \newline (verglichen mit std::vector, worst case)
-		  	\item Jeder nimmt std::vector => mal was anderes :D
-		  	\item Bischen mehr template programming :)
-	  	\end{enumerate}
-	\end{enumerate}
+  \section{Kanonische Generatormatrix}
+  \begin{frame}{Kanonische Generatormatrix}
+  	\begin{itemize}
+	  	\item Verwende Gauß zum "Lösen" \space der Generatormatrix
+	  	\item Anpassungen an Gauß
+	  	\begin{itemize}
+	  	\item Wird eine 0-Zeile gefunden wirf Exception \newline (Zeilen sind nicht linear unabhängig)
+	  	\item Diagonale 1en werden erzwungen \newline (Spalten werden notfalls getauscht)
+	  	\end{itemize}
+	\end{itemize}
   \end{frame}
   
-  \section{Modulare Polynommultiplikation}
-    \begin{frame}{Modulare Polynommultiplikation \newline - Algorithmen Beschreibung}
-		Bekannte Parameter: Poly1, Poly2, DivPoly, PolyBasis
-    	\begin{enumerate}
-  	  	\item Berechne: Poly1 * Poly2, in temporäres Array (Tmp)
-  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
-  	  	\item Solange $Tmp.Grad >= DivPoly.Grad$ gilt
-  	  	\begin{enumerate}
-	  	  	\item Berechne Additions-Faktor $F$, mit $F = PolyBasis - Tmp.Grad$ \newline (gilt nur wenn DivPoly[DivPoly.Grad] == 1 ist)
-	  	  	\item Berechne Shift $S$, mit $S = Tmp.Grad - DivPoly.Grad$
-	  	  	\item Addiere Komponentenweise das "geshiftete" DivPoly zu Tmp
-	  	  	\item Reduziere alle Komponenten von Tmp zur PolyBasis
-  	  	\end{enumerate}
-  	  	\item Ergebnis der Multiplikation: Polynom Tmp
-  	  	\end{enumerate}
-    \end{frame}
+  \section{Kontrollmatrix}
+  \begin{frame}{Kontrollmatrix - Allgemein}
+  \begin{itemize}
+	  \item ist eine $(n-k) \times n$ Matrix
+	  \item Werden von Generatormatrizen generiret
+	  \item Berechnen "Syndrome" \space von empfangenen Nachrichten
+	  \item Ermöglichen so die maximum likelyhood Dekodierung
+  \end{itemize}
+  \end{frame}
+  
+  \begin{frame}{Kontrollmatrix - Berechnung}
+    Bestehen aus 2 Teilen
+    \begin{itemize}
+		\item Linker Teil: \newline Transponierte Nichtbasisspalten
+		\item Rechter Teil: \newline Einheitsmatrix mit dem Wert "$-1$" \space als Diagonale
+  	\end{itemize}
+	(ein Beispiel wird anhand des Scriptes vorgeführt)
+  \end{frame}
+  
+  
+  \section{Syndromtabelle}
+  \begin{frame}{Syndromtabelle - Allgemeines}
+	  \begin{itemize}
+	  \item Durch Syndrome ($(n - k)$ große Vektoren) können Codewortfehler errechnet werden
+	  \item Jedes Syndrom beschreibt eine Nebenklasse
+	  \item Codewortfehler ("Syndrome") werden mithilfe der Nebenklassenanführer erstellt
+	  \item Nebenklassenanführer sind diejenigen einer Nebenklasse mit der kleinsten Hammingdistanz zum 0-Wort
+	  \item Existieren mehrere Nebenklassenanführer ist keine eindeutige Zuordnung des Codewortes möglich
+	  \end{itemize}
+  \end{frame}
+  
+  \begin{frame}{Syndromtabelle - Erstellung}
+	  2 Mögliche Wege
+  	  \begin{itemize}
+	  \item Transponiere die Kontrollmatrix und multipliziere jede mögliches Syndrom
+	  \begin{itemize}
+	  \item Vorteil: Sehr Performant und arbeitspeicher schonent
+	  \end{itemize}
+	  \item Erstelle alle möglichen Codeworter und deren Syndrome
+	  \begin{itemize}
+	  \item Finde minimale gewichte
+	  \item Makiere Nebenklassen mit mehreren Nebenklassenanführeren
+	  \item Vorteil: Wissen über mögliche, falsche Codewort Dekodierung
+	  \end{itemize}
+  	  \end{itemize}
+  \end{frame}
     
-    \begin{frame}[fragile]{Modulare Polynommultiplikation \newline - Programmcode}
-    	\begin{lstlisting}[style=numbers]
-// create temporary polynom with 2*_MaxLength
-// this is the maximum grad the *-Operation can create
-Polynom<_MaxDegree * 2, _BaseValue> tmp, tmpResult;
-
-// calculate "multiplication" into tmp poly
-for (int i = 0, myDegree = this->degree(), polyDegree = poly.degree(); i <= myDegree; ++i){
-    for (int k = 0; k <= polyDegree; ++k)
-        tmpResult.m_Data[i + k] += poly.m_Data[k] * this->m_Data[i];
-}
-tmpResult._truncateToBaseValue();
-const int divisionDegree = DIVISION_POLYNOM->degree();
-for (int tmpResDegree = tmpResult.degree(); tmpResDegree >= divisionDegree; tmpResDegree = tmpResult.degree()){
-    int factor = _BaseValue - tmpResult.m_Data[tmpResDegree];
-    int shift = tmpResDegree - divisionDegree;
-
-    for (int i = 0; i <= divisionDegree; ++i)
-        tmpResult.m_Data[shift + i] += factor * DIVISION_POLYNOM->m_Data[i];
-    tmpResult._truncateToBaseValue();
-}
-MY_TYPE toReturn;
-for (int i = 0; i < _MaxDegree; ++i)
-    toReturn.m_Data[i] = tmpResult.m_Data[i];
-
-// return "shrinked" result
-return toReturn;
-\end{lstlisting}
-\end{frame}
-
-	\section{Tabellengenerierung}
-    \begin{frame}{Tabellengenerierung - \newline Beschreibung}\label{Page_TabelGen}
-	    Die Tabellengenerierung wird durch Überführung eines Iterator zu einem Polynom durchgeführt. \newline
-	    Als Parameter wird ist der Basiswert des Polynoms gegeben. \newline
-    	Konventierung \textit{Iterator - Polynom:}
-    	\begin{enumerate}
-    		\item Erstelle eine ArrayPosition $i = 0$
-    		\item Setze $Poly[ArrayPosition] =$ $Iterator$ $mod$ $Base$ \label{TableGen_LoopStart}
-    		\item Setze $Iterator = Iterator / Base$
-    		\item Inkrementiere die ArrayPosition \label{TableGen_LoopEnd}
-    		\item Wiederhole Schritt \ref*{TableGen_LoopStart} bis \ref*{TableGen_LoopEnd} solange $Iterator > 0$
-    	\end{enumerate}
-    	Durch eine Doppelschleife kann eine Multi-/Additionstabelle generiert und ausgegeben werden
-    \end{frame}
-    
-    \begin{frame}[fragile]{Tabellengenerierung - \newline Programmcode}
-	    Anmerkung: Teile des Programmcodes (Tabllenlienien) \newline wurden entfert (ansonsten genügt eine Folie nicht)
-    	\begin{lstlisting}[style=numbers]
-// generate polynoms from int-iterator
-auto generatePolynom = [](int value) -> Polynom<_PolySize, _BaseValue>{
-    Polynom<_PolySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data[i] = value % _BaseValue;
-        value /= _BaseValue;
-    }
-    return toReturn;
-};
-Polynom<_PolySize, _BaseValue>::DIVISION_POLYNOM = &divisionPoly;
-
-// table itself
-for (int iter1 = 0; iter1 < tableSize; ++iter1){
-    auto poly_a = generatePolynom(iter1);
-
-    for (int iter2 = 0; iter2 < tableSize; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-
-        // foo is a function which perforams addition or multiplication
-        std::cout << foo(poly_a, poly_b);
-    }
-}
-\end{lstlisting}
-\end{frame}
-
-
-\begin{frame}{Modulare Polynommultiplikation - \newline Assoziativgesetz Überprüfung}
-	Der Test verwendet die Überführung einer Iteratorposition $Iter$ zu einem Polynom $Poly$, beschrieben auf Folie \ref*{Page_TabelGen}.
-	\begin{enumerate}
-		\item Für alle $i, k, m$ in $[0, TableSize - 1]$
-		\item Erstelle Poly1 = generatePolyFromIter($i$)
-		\item Erstelle Poly2 = generatePolyFromIter($k$)
-		\item Erstelle Poly3 = generatePolyFromIter($m$)
-		\item Wenn $(Poly1 * Poly2) * Poly3 \neq Poly1 * (Poly2 * Poly3)$
-		\begin{itemize}
-			\item Fehler erkannt
-			\item Wirf Exception
-		\end{itemize}
-	\end{enumerate}
-	(Geteste wird jeder überführter Körper von Aufgabe 4)
-\end{frame}
-
-\begin{frame}[fragile]{Modulare Polynommultiplikation - \newline Assoziativgesetz Programmcode}
-	\begin{lstlisting}[style=numbers]
-Polynom<_ArraySize, _BaseValue>::DIVISION_POLYNOM = &div;
-auto generatePolynom = [](int value) -> Polynom<_ArraySize, _BaseValue>{
-Polynom<_ArraySize, _BaseValue> toReturn;
-    for (int i = 0; value; ++i){
-        toReturn.m_Data.at(i) = value % _BaseValue;
-        value /= _BaseValue;
-    }
-    return toReturn;
-};
-// check for error
-for (int iter1 = 0; iter1 < _TestLength; ++iter1){
-    auto poly_a = generatePolynom(iter1);
-
-    for (int iter2 = 0; iter2 < _TestLength; ++iter2){
-        auto poly_b = generatePolynom(iter2);
-
-        for (int iter3 = 0; iter3 < _TestLength; ++iter3){
-            auto poly_c = generatePolynom(iter3);
-            auto abc = (poly_a * poly_b) * poly_c;
-            auto bca = poly_a * (poly_b  * poly_c);
-            if (abc != bca)
-                throw std::runtime_error("Error: wrong implementation");
-        }
-    }
-}
-std::cout << "\rmultiplication found no errors" << std::endl;
-\end{lstlisting}
-\end{frame}
+   
+   \section{Maximum-Likelhood Dekodierung}
+   \begin{frame}{Maximum-Likelhood Dekodierung}
+   \begin{itemize}
+	\item Errechne Syndrom des erhaltenen Codewortes
+	\item Ziehe den Nebenklassenanführer vom Codewort ab
+	\item Überbleibendes Codewort ist das wahrscheinlichste
+   \end{itemize}
+   \end{frame}
+  
 
 \section*{Vielen Dank für die Aufmerksamkeit!}
   

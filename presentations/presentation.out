@@ -1,5 +1,5 @@
-\BOOKMARK [2][]{Outline0.1}{Generierung\040des\040Huffman-Baums}{}% 1
-\BOOKMARK [2][]{Outline0.2}{Zeichencodierung}{}% 2
-\BOOKMARK [2][]{Outline0.3}{Rekunstruktion\040des\040Huffman-Baums}{}% 3
-\BOOKMARK [2][]{Outline0.4}{Lesen\040des\040codierten\040Strings}{}% 4
-\BOOKMARK [2][]{Outline0.5}{Entropie}{}% 5
+\BOOKMARK [2][]{Outline0.1}{Generatormatrix\040Allgemein}{}% 1
+\BOOKMARK [2][]{Outline0.2}{Kanonische\040Generatormatrix}{}% 2
+\BOOKMARK [2][]{Outline0.3}{Kontrollmatrix}{}% 3
+\BOOKMARK [2][]{Outline0.4}{Syndromtabelle}{}% 4
+\BOOKMARK [2][]{Outline0.5}{Maximum-Likelhood\040Dekodierung}{}% 5
