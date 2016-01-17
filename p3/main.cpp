@@ -76,6 +76,7 @@ int main(){
     constexpr int base_f2 = 2;
     constexpr int rows_f2 = 2;
     constexpr int cols_f2 = 6;
+    constexpr int syndromSize_f2 = cols_f2 - rows_f2;
     constexpr int numElements_f2 = CONSTEXPR::pow(base_f2, cols_f2);
     CodingMatrix<int, base_f2, rows_f2, cols_f2> generator_f2 = {
         std::array<int, cols_f2>{1, 0, 1, 0, 1, 0},
@@ -85,7 +86,7 @@ int main(){
     auto controll_f2 = generator_f2.generateControllMatrix();
 
     std::cout << "generator matrix:\n" << generator_f2 << std::endl << "controll matrix:\n" << controll_f2 << std::endl;
-    NebenKlasse<int, base_f2, (cols_f2 - rows_f2), cols_f2> nk_f2 = NebenKlasse<int, base_f2, (cols_f2 - rows_f2), cols_f2>(controll_f2);
+    NebenKlasse<int, base_f2, syndromSize_f2, cols_f2> nk_f2 = NebenKlasse<int, base_f2, syndromSize_f2, cols_f2>(controll_f2);
 
     for (int i = 0; i < numElements_f2; ++i){
         Vector<int, base_f2, cols_f2> received;
@@ -110,20 +111,19 @@ int main(){
 // EXAMPLE F3
     std::cout << "Example F_3" << std::endl;
     constexpr int base_f3 = 3;
-    constexpr int rows_f3 = 3;
-    constexpr int cols_f3 = 5;
+    constexpr int rows_f3 = 2;
+    constexpr int cols_f3 = 3;
+    constexpr int syndromSize_f3 = cols_f3 - rows_f3;
     constexpr int numElements_f3 = CONSTEXPR::pow(base_f3, cols_f3);
-    CodingMatrix<int, base_f3, rows_f3, cols_f3> controll_f3 = {
-        std::array<int, cols_f3>{1, 0, 0, 1, 1},
-        std::array<int, cols_f3>{0, 1, 0, 1, 0},
-        std::array<int, cols_f3>{0, 0, 1, 0, 1}
+    CodingMatrix<int, base_f3, rows_f3, cols_f3> generator_f3 = {
+        std::array<int, cols_f3>{1, 1, 1},
+        std::array<int, cols_f3>{2, 2, 1}
     };
-
-    controll_f3.solveGauss();
-    auto generator_f3 = controll_f3.generateControllMatrix();
     generator_f3.solveGauss();
+    auto controll_f3 = generator_f3.generateControllMatrix();
+
     std::cout << "generator matrix:\n" << generator_f3 << std::endl << "controll matrix:\n" << controll_f3 << std::endl;
-    NebenKlasse<int, base_f3, rows_f3, cols_f3> nk_f3 = NebenKlasse<int, base_f3, rows_f3, cols_f3>(controll_f3);
+    NebenKlasse<int, base_f3, syndromSize_f3, cols_f3> nk_f3 = NebenKlasse<int, base_f3, syndromSize_f3, cols_f3>(controll_f3);
 
     for (int i = 0; i < numElements_f3; ++i){
         Vector<int, base_f3, cols_f3> received;
@@ -147,22 +147,20 @@ int main(){
 // EXAMPLE F5
     std::cout << "Example F_5" << std::endl;
     constexpr int base_f5 = 5;
-    constexpr int rows_f5 = 3;
-    constexpr int cols_f5 = 5;
+    constexpr int rows_f5 = 1;
+    constexpr int cols_f5 = 3;
+    constexpr int syndromSize_f5 = cols_f5 - rows_f5;
     constexpr int numElements_f5 = CONSTEXPR::pow(base_f5, cols_f5);
-    CodingMatrix<int, base_f5, rows_f5, cols_f5> controll_f5 = {
-        std::array<int, cols_f5>{1, 0, 0, 1, 1},
-        std::array<int, cols_f5>{0, 1, 0, 1, 0},
-        std::array<int, cols_f5>{0, 0, 1, 0, 1}
+    CodingMatrix<int, base_f5, rows_f5, cols_f5> generator_f5 = {
+        std::array<int, cols_f5>{1, 2, 3},
     };
-
-    controll_f5.solveGauss();
-    auto generator_f5 = controll_f5.generateControllMatrix();
     generator_f5.solveGauss();
-    std::cout << "generator matrix:\n" << generator_f5 << std::endl << "controll matrix:\n" << controll_f5 << std::endl;
-    NebenKlasse<int, base_f5, rows_f5, cols_f5> nk_f5 = NebenKlasse<int, base_f5, rows_f5, cols_f5>(controll_f5);
+    auto controll_f5 = generator_f5.generateControllMatrix();
 
-    for (int i = 0; i < numElements_f3; ++i){
+    std::cout << "generator matrix:\n" << generator_f5 << std::endl << "controll matrix:\n" << controll_f5 << std::endl;
+    NebenKlasse<int, base_f5, syndromSize_f5, cols_f5> nk_f5 = NebenKlasse<int, base_f5, syndromSize_f5, cols_f5>(controll_f5);
+
+    for (int i = 0; i < numElements_f5; ++i){
         Vector<int, base_f5, cols_f5> received;
         for (int tmp = i, iter = 0; tmp && iter < cols_f5; tmp /= base_f5, ++iter)
             received[iter] = tmp % base_f5;
@@ -176,6 +174,7 @@ int main(){
         std::cout << blue << result << _default << "\tmax likeley" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result")
                   << _default << std::endl << std::endl;
     }
+
 	return 0;
 }
 
