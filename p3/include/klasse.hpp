@@ -61,8 +61,10 @@ public:
             if (count_lhs == count_rhs)
                 isSingleResult = false;
 
-            if (count_lhs < count_rhs)
+            if (count_lhs < count_rhs){
+                isSingleResult = true;
                 return true;
+            }
             return false;
         };
 

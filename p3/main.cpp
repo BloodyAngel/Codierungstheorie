@@ -74,20 +74,18 @@ int main(){
 // EXAMPLE F2
     std::cout << "Example F_2" << std::endl;
     constexpr int base_f2 = 2;
-    constexpr int rows_f2 = 3;
-    constexpr int cols_f2 = 5;
+    constexpr int rows_f2 = 2;
+    constexpr int cols_f2 = 6;
     constexpr int numElements_f2 = CONSTEXPR::pow(base_f2, cols_f2);
-    CodingMatrix<int, base_f2, rows_f2, cols_f2> controll_f2 = {
-        std::array<int, cols_f2>{1, 0, 0, 1, 1},
-        std::array<int, cols_f2>{0, 1, 0, 1, 0},
-        std::array<int, cols_f2>{0, 0, 1, 0, 1}
+    CodingMatrix<int, base_f2, rows_f2, cols_f2> generator_f2 = {
+        std::array<int, cols_f2>{1, 0, 1, 0, 1, 0},
+        std::array<int, cols_f2>{0, 1, 0, 1, 0, 1}
     };
-
-    controll_f2.solveGauss();
-    auto generator_f2 = controll_f2.generateControllMatrix();
     generator_f2.solveGauss();
+    auto controll_f2 = generator_f2.generateControllMatrix();
+
     std::cout << "generator matrix:\n" << generator_f2 << std::endl << "controll matrix:\n" << controll_f2 << std::endl;
-    NebenKlasse<int, base_f2, rows_f2, cols_f2> nk_f2 = NebenKlasse<int, base_f2, rows_f2, cols_f2>(controll_f2);
+    NebenKlasse<int, base_f2, (cols_f2 - rows_f2), cols_f2> nk_f2 = NebenKlasse<int, base_f2, (cols_f2 - rows_f2), cols_f2>(controll_f2);
 
     for (int i = 0; i < numElements_f2; ++i){
         Vector<int, base_f2, cols_f2> received;
@@ -110,7 +108,7 @@ int main(){
 
 
 // EXAMPLE F3
-    std::cout << "Example F_5" << std::endl;
+    std::cout << "Example F_3" << std::endl;
     constexpr int base_f3 = 3;
     constexpr int rows_f3 = 3;
     constexpr int cols_f3 = 5;

@@ -41,7 +41,6 @@ public:
 
         for (int i = 0; i < tmpKlassen.size(); ++i){
             this->m_Syndroms[i].isSingleResult = tmpKlassen[i].calculateSmallestWeight();
-            bool test = this->m_Syndroms[i].isSingleResult;
             this->m_Syndroms[i].result = *tmpKlassen[i].getSmallestWeight();
         }
     }
