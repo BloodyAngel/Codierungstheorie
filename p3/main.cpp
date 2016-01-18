@@ -3,6 +3,9 @@
 #include "nebenklassen.hpp"
 
 #include <iostream>
+#include <chrono>
+
+using namespace std::string_literals;
 
 
 namespace CONSTEXPR{
@@ -34,6 +37,9 @@ namespace Color {
             return os << "\033[" << mod.code << "m";
         }
     };
+    inline namespace Version_10 {
+        struct Sebbel{};
+    }
 }
 
 
@@ -46,13 +52,20 @@ int main(){
 
     CodingMatrix<int, 3, 4, 5> m1 = {
         std::array<int, 5>{1, 1, 1, 2, 1},
+        //std::array<int, 5>{2, 2, 2, 1, 2},
+        //std::array<int, 5>{2, 2, 2, 1, 1}, // error case
         std::array<int, 5>{1, 2, 2, 1, 2},
         std::array<int, 5>{1, 1, 0, 1, 0},
-        std::array<int, 5>{2, 0, 1, 1, 0},
+        //std::array<int, 5>{2, 0, 1, 0, 1},
+        std::array<int, 5>{2, 0, 1, 1, 0}, // swap
     };
+
+
     std::cout << "input matrix: \n" << m1 << std::endl << std::endl;
-    m1.solveGauss();
-    std::cout << "gaussian solved matrix: \n" << m1 << std::flush;
+    m1.solveAdjustedGauss();
+    std::cout << "gaussian solved matrix: \n" << m1 << std::endl << std::endl;
+    std::cout << "Transposed gaussian:\n" << m1.transpose() << std::flush;
+
     getchar();
     system("clear");
 
@@ -66,8 +79,9 @@ int main(){
     auto transpose = control.transpose();
 
     m2.truncateToBase();
-    std::cout << "Generator matrix:\n\n" << m2      << std::endl << std::endl
-              << "Control   matrix:\n\n" << control << std::flush;
+    std::cout << "Generator matrix:\n"   << m2      << std::endl << std::endl
+              << "Control   matrix:\n"   << control << std::endl << std::endl
+              << "Transposed control:\n" << control.transpose() << std::endl;
     getchar();
     system("clear");
 
@@ -82,7 +96,7 @@ int main(){
         std::array<int, cols_f2>{1, 0, 1, 0, 1, 0},
         std::array<int, cols_f2>{0, 1, 0, 1, 0, 1}
     };
-    generator_f2.solveGauss();
+    generator_f2.solveAdjustedGauss();
     auto controll_f2 = generator_f2.generateControllMatrix();
 
     std::cout << "generator matrix:\n" << generator_f2 << std::endl << "controll matrix:\n" << controll_f2 << std::endl;
@@ -99,7 +113,7 @@ int main(){
         Vector<int, base_f2, cols_f2> result = received;
         bool confidence = nk_f2.getMaximumLikely(result);
 
-        std::cout << blue << result << _default << "\tmax likeley" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result") << _default
+        std::cout << blue << result << _default << "\tmax likely" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result") << _default
                   << std::endl << std::endl;
     }
     getchar();
@@ -116,10 +130,10 @@ int main(){
     constexpr int syndromSize_f3 = cols_f3 - rows_f3;
     constexpr int numElements_f3 = CONSTEXPR::pow(base_f3, cols_f3);
     CodingMatrix<int, base_f3, rows_f3, cols_f3> generator_f3 = {
-        std::array<int, cols_f3>{1, 1, 1},
+        std::array<int, cols_f3>{1, 2, 2},
         std::array<int, cols_f3>{2, 2, 1}
     };
-    generator_f3.solveGauss();
+    generator_f3.solveAdjustedGauss();
     auto controll_f3 = generator_f3.generateControllMatrix();
 
     std::cout << "generator matrix:\n" << generator_f3 << std::endl << "controll matrix:\n" << controll_f3 << std::endl;
@@ -136,7 +150,7 @@ int main(){
         Vector<int, base_f3, cols_f3> result = received;
         bool confidence = nk_f3.getMaximumLikely(result);
 
-        std::cout << blue << result << _default << "\tmax likeley" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result")
+        std::cout << blue << result << _default << "\tmax likely" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result")
                   << _default << std::endl << std::endl;
     }
     getchar();
@@ -154,7 +168,7 @@ int main(){
     CodingMatrix<int, base_f5, rows_f5, cols_f5> generator_f5 = {
         std::array<int, cols_f5>{1, 2, 3},
     };
-    generator_f5.solveGauss();
+    generator_f5.solveAdjustedGauss();
     auto controll_f5 = generator_f5.generateControllMatrix();
 
     std::cout << "generator matrix:\n" << generator_f5 << std::endl << "controll matrix:\n" << controll_f5 << std::endl;
@@ -171,10 +185,9 @@ int main(){
         Vector<int, base_f5, cols_f5> result = received;
         bool confidence = nk_f5.getMaximumLikely(result);
 
-        std::cout << blue << result << _default << "\tmax likeley" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result")
+        std::cout << blue << result << _default << "\tmax likely" << '\t' << (confidence ? green : red) << (confidence ? "correct result" : "possibly wrong result")
                   << _default << std::endl << std::endl;
     }
-
 	return 0;
 }
 
