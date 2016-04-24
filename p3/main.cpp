@@ -4,6 +4,12 @@
 
 #include <iostream>
 
+#ifdef __cpp_constexpr
+#define CONSTEXPRESSION constexpr
+#else
+#define CONSTEXPRESSION
+#endif
+
 
 namespace CONSTEXPR{
 constexpr int pow(int base, int power){
@@ -177,4 +183,3 @@ int main(){
 
 	return 0;
 }
-
