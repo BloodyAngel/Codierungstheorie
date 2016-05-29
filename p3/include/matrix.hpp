@@ -85,7 +85,7 @@ public:
     }
 
 
-    void solveGauss(){
+    void solveAdjustedGauss(){
         // actual solve gauss
         // adjust diagonal to have a non 0 value
         for (int col = 0; col < _Cols && col < _Rows; ++col){
@@ -97,8 +97,10 @@ public:
                     break;
                 }
             }
-            if (allZeros)
+            if (allZeros){
+                std::cout << *this;
                 throw std::runtime_error("Error: rows are not linear indipendent, reached column: " + std::to_string(col));
+            }
 
             for (int i = col + 1; !this->m_Data[col][col] && i < _Rows; ++i){
                 if (i >= _Rows)
@@ -139,10 +141,11 @@ public:
                 throw std::runtime_error("Error in function: 'solveGauss', cannot generate diagonal, reached column: " + std::to_string(col));
 
 
-            // all values below Matrix[col][col] has to be 0
+            /// all values below Matrix[col][col] has to be 0
             // => row = col + 1, no need to change the others
-            for (int row = col + 1; row < _Rows; ++row){
-                if (!this->m_Data[row][col])
+            //for (int row = col + 1; row < _Rows; ++row){
+            for (int row = 0; row < _Rows; ++row){
+                if (!this->m_Data[row][col] || row == col)
                     continue; // already 0
 
                 _ValueType factor = _Base - this->m_Data[row][col];
